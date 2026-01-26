@@ -19,6 +19,66 @@
   gap: 8px;
 }
 
+.app-main--loading {
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 80px);
+}
+
+.loader {
+  width: 232px;
+  height: 76px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  box-sizing: border-box;
+}
+
+.loader__balls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 28px;
+  position: relative;
+}
+
+.loader__ball {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  animation: ballPulse 1.4s ease-in-out infinite;
+}
+
+.loader__ball--top {
+  background-color: #5392DC;
+}
+
+.loader__ball--bottom {
+  background-color: #5392DC;
+  opacity: 0.3;
+  animation-delay: 0.7s;
+}
+
+.loader__text {
+  font-size: 14px;
+  line-height: 1.2;
+  font-weight: 600;
+  color: #4e4e4e;
+  text-align: center;
+}
+
+@keyframes ballPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.8);
+  }
+}
+
 .content-block {
   background: #fff;
   border-radius: 20px;

@@ -35,8 +35,14 @@ function App() {
     return (
       <div className="app">
         <Header />
-        <main className="app-main">
-          <div>Загрузка...</div>
+        <main className="app-main app-main--loading">
+          <div className="loader">
+            <div className="loader__balls">
+              <div className="loader__ball loader__ball--top"></div>
+              <div className="loader__ball loader__ball--bottom"></div>
+            </div>
+            <div className="loader__text">Проверяем наличие подписок на каналы</div>
+          </div>
         </main>
       </div>
     )
