@@ -1,0 +1,19 @@
+.header-container {
+  background: #f3f3f3;
+  height: 36px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.header-text {
+  font-weight: 400;
+  margin-left: 8px;
+  color: #222222;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.header-text span {
+  color: #2b79d6;
+}

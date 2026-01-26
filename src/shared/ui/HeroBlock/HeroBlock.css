@@ -1,0 +1,25 @@
+.hero-block {
+  height: 152px;
+  background: linear-gradient(to right, #5392dc, #3067a9);
+  border-radius: 20px;
+  padding: 28px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 17px;
+}
+
+.hero-block__icon {
+  flex-shrink: 0;
+}
+
+.hero-block__text {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: white;
+  text-align: center;
+}
