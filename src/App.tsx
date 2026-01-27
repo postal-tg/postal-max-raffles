@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import './App.css'
 import { Header } from './shared/ui/Header/Header'
 import { HeroBlock } from './shared/ui/HeroBlock/HeroBlock'
 import { raffleApi, type RaffleData } from './api/raffleApi'
+import { login } from './api/authApi'
 
 const formatDate = (date: Date): string => {
   const day = String(date.getDate()).padStart(2, '0')
@@ -14,21 +15,31 @@ const formatDate = (date: Date): string => {
 function App() {
   const [raffleData, setRaffleData] = useState<RaffleData | null>(null)
   const [loading, setLoading] = useState(true)
+  const initialized = useRef(false)
 
   useEffect(() => {
-    const loadRaffleData = async () => {
+    // Предотвращаем повторный вызов в StrictMode
+    if (initialized.current) {
+      return
+    }
+    initialized.current = true
+
+    const initializeApp = async () => {
       try {
         setLoading(true)
+        // Сначала выполняем аутентификацию
+        await login()
+        // Затем загружаем данные розыгрыша
         const data = await raffleApi.getRaffleData()
         setRaffleData(data)
       } catch (error) {
-        console.error('Ошибка загрузки данных розыгрыша:', error)
+        console.error('Ошибка инициализации приложения:', error)
       } finally {
         setLoading(false)
       }
     }
 
-    loadRaffleData()
+    initializeApp()
   }, [])
 
   if (loading || !raffleData) {
@@ -65,7 +76,11 @@ function App() {
           </svg>
           <span className="raffle-end-row__label">Розыгрыш уже завершен</span>
         </div>
-        <button className="close-button" onClick={() => window.WebApp.close()}>Закрыть</button>
+        <button className="close-button" onClick={() => {
+          if (window.WebApp?.close) {
+            window.WebApp.close()
+          }
+        }}>Закрыть</button>
       </div>
     </main>
   </div>

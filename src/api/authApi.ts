@@ -1,0 +1,76 @@
+// Типы для ответа от API аутентификации
+type AuthResponse = {
+  access_token: string
+  refresh_token: string
+}
+
+// Типы для window.WebApp
+declare global {
+  interface Window {
+    WebApp?: {
+      initData?: string
+      close?: () => void
+    }
+  }
+}
+
+const API_BASE_URL = 'https://testpostal.ru'
+
+// Ключи для localStorage
+const ACCESS_TOKEN_KEY = 'access_token'
+const REFRESH_TOKEN_KEY = 'refresh_token'
+
+/**
+ * Сохраняет токены в localStorage
+ */
+function saveTokens(accessToken: string, refreshToken: string): void {
+  localStorage.setItem(ACCESS_TOKEN_KEY, accessToken)
+  localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken)
+}
+
+/**
+ * Получает сохраненный access token
+ */
+export function getAccessToken(): string | null {
+  return localStorage.getItem(ACCESS_TOKEN_KEY)
+}
+
+/**
+ * Получает сохраненный refresh token
+ */
+export function getRefreshToken(): string | null {
+  return localStorage.getItem(REFRESH_TOKEN_KEY)
+}
+
+/**
+ * Проверяет, есть ли уже сохраненный токен
+ */
+export function isAuthenticated(): boolean {
+  return !!getAccessToken()
+}
+
+/**
+ * Выполняет аутентификацию через WebApp initData.
+ * Получает initData, отправляет POST на /prize-draws/webapp/login и сохраняет токены.
+ */
+export async function login(): Promise<AuthResponse> {
+  const initData = window.WebApp?.initData
+
+  const response = await fetch(`${API_BASE_URL}/prize-draws/webapp/login`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(initData),
+  })
+
+  if (!response.ok) {
+    const errorText = await response.text()
+    throw new Error(`Ошибка аутентификации: ${response.status} ${errorText}`)
+  }
+
+  const authData: AuthResponse = await response.json()
+  saveTokens(authData.access_token, authData.refresh_token)
+
+  return authData
+}
