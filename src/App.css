@@ -19,7 +19,7 @@
   gap: 8px;
 }
 
-.app-main--loading {
+.app-main--center {
   flex: 1;
   justify-content: center;
   align-items: center;
@@ -97,6 +97,22 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  width: 100%;
+}
+
+.raffle-end-row-container__info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 17px;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 28px 0;
+  width: 100%;
+  font-size: 14px;
+  line-height: 1.2;
+  font-weight: 500;
+  color: #4e4e4e;
 }
 
 .raffle-end-row {
@@ -109,6 +125,18 @@
   align-items: center;
   justify-content: space-between;
   box-sizing: border-box;
+}
+
+.close-button {
+  background: #5392DC;
+  border-radius: 12px;
+  height: 48px;
+  width: 100%;
+  color: #ffffff;
+  text-align: center;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
 }
 
 .raffle-end-row__label {

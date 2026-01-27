@@ -35,7 +35,7 @@ function App() {
     return (
       <div className="app">
         <Header />
-        <main className="app-main app-main--loading">
+        <main className="app-main app-main--center">
           <div className="loader">
             <div className="loader__balls">
               <div className="loader__ball loader__ball--top"></div>
@@ -48,9 +48,28 @@ function App() {
     )
   }
 
-  const { channels, endDate, isParticipating } = raffleData
-  const allSubscribed = channels.every((channel) => channel.subscribed)
-  const endDateObj = new Date(endDate)
+
+  const { channels, endsDateTime, isParticipating, isFinished } = raffleData
+  const allSubscribed = channels.every((channel) => channel.isSubscribed)
+  const endDateObj = endsDateTime ? new Date(endsDateTime) : null
+
+  if (isFinished) {
+    return <div className="app">
+    <Header />
+    <main className="app-main app-main--center">
+      <div className="raffle-end-row-container">
+        <div className="raffle-end-row-container__info">
+          <svg width="67" height="67" viewBox="0 0 67 67" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M61 33.5C61 18.3122 48.6878 6 33.5 6C18.3122 6 6 18.3122 6 33.5C6 48.6878 18.3122 61 33.5 61V67C14.9985 67 0 52.0015 0 33.5C0 14.9985 14.9985 0 33.5 0C52.0015 0 67 14.9985 67 33.5C67 52.0015 52.0015 67 33.5 67V61C48.6878 61 61 48.6878 61 33.5Z" fill="#5392DC"/>
+            <path d="M30.4336 15.376C30.4336 13.7191 31.7767 12.376 33.4336 12.376C35.0904 12.376 36.4336 13.7191 36.4336 15.376V33.2393L49.0732 45.8789C50.2448 47.0505 50.2448 48.9495 49.0732 50.1211C47.9017 51.2927 46.0026 51.2927 44.8311 50.1211L31.3125 36.6025C30.7499 36.0399 30.4336 35.2771 30.4336 34.4814V15.376Z" fill="#5392DC"/>
+          </svg>
+          <span className="raffle-end-row__label">Розыгрыш уже завершен</span>
+        </div>
+        <button className="close-button" onClick={() => window.WebApp.close()}>Закрыть</button>
+      </div>
+    </main>
+  </div>
+  }
 
   return (
     <div className="app">
@@ -59,10 +78,12 @@ function App() {
         <HeroBlock allSubscribed={allSubscribed} />
         <div className="content-block">
           <div className="raffle-end-row-container">
-            <div className="raffle-end-row">
-              <span className="raffle-end-row__label">Розыгрыш кончится:</span>
-              <span className="raffle-end-row__date">{formatDate(endDateObj)}</span>
-            </div>
+            {endDateObj && (
+              <div className="raffle-end-row">
+                <span className="raffle-end-row__label">Розыгрыш кончится:</span>
+                <span className="raffle-end-row__date">{formatDate(endDateObj)}</span>
+              </div>
+            )}
             <button 
               className={`participate-button ${isParticipating ? 'participate-button--participating' : ''} ${!allSubscribed ? 'participate-button--disabled' : ''}`}
               type="button"
@@ -114,10 +135,10 @@ function App() {
             <span className="channels-header__text">Каналы для подписки</span>
           </div>
           <div className="channels-list">
-            {channels.map((channel, index) => (
-              <div key={index} className="channel-card">
-                <span className="channel-card__name">{channel.name}</span>
-                {channel.subscribed && (
+            {channels.map((channel) => (
+              <div key={channel.id} className="channel-card">
+                <span className="channel-card__name">{channel.title}</span>
+                {channel.isSubscribed && (
                   <img 
                     src="./src/assets/images/check.png" 
                     alt="Подписан" 
