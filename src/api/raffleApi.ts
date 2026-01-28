@@ -59,7 +59,8 @@ function transformApiRaffleData(apiData: ApiRaffleData): RaffleData {
   }
 }
 
-const API_BASE_URL = 'https://testpostal.ru'
+// Используем переменную окружения, если она задана, иначе пустая строка (относительный путь)
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ''
 
 /**
  * Выполняет fetch запрос с автоматической обработкой 401 ошибок.

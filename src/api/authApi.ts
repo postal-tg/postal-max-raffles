@@ -14,7 +14,8 @@ declare global {
   }
 }
 
-const API_BASE_URL = 'https://testpostal.ru'
+// Используем переменную окружения, если она задана, иначе пустая строка (относительный путь)
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ''
 
 // Ключи для localStorage
 const ACCESS_TOKEN_KEY = 'access_token'
