@@ -9,6 +9,7 @@ import { formatDate, formatAmount } from './shared/utils/format'
 function App() {
   const [raffleData, setRaffleData] = useState<RaffleData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isParticipatingLoading, setIsParticipatingLoading] = useState(false)
   const initialized = useRef(false)
 
   useEffect(() => {
@@ -58,7 +59,13 @@ function App() {
   const endDateObj = endsDateTime ? new Date(endsDateTime) : null
 
   const handleParticipateClick = async () => {
+    // Предотвращаем повторные клики
+    if (isParticipatingLoading || isParticipating) {
+      return
+    }
+
     try {
+      setIsParticipatingLoading(true)
       const response = await raffleApi.participate()
 
       if (response.success) {
@@ -76,6 +83,8 @@ function App() {
       }
     } catch (error) {
       console.error('Ошибка при участии в розыгрыше:', error)
+    } finally {
+      setIsParticipatingLoading(false)
     }
   }
 
@@ -121,7 +130,7 @@ function App() {
             <button 
               className={`participate-button ${isParticipating ? 'participate-button--participating' : ''} ${!isAllSubscribed ? 'participate-button--disabled' : ''}`}
               type="button"
-              disabled={!isAllSubscribed}
+              disabled={!isAllSubscribed || isParticipating || isParticipatingLoading}
               onClick={handleParticipateClick}
             >
               <img 
