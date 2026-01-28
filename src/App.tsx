@@ -4,13 +4,7 @@ import { Header } from './shared/ui/Header/Header'
 import { HeroBlock } from './shared/ui/HeroBlock/HeroBlock'
 import { raffleApi, type RaffleData } from './api/raffleApi'
 import { login } from './api/authApi'
-
-const formatDate = (date: Date): string => {
-  const day = String(date.getDate()).padStart(2, '0')
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const year = String(date.getFullYear()).slice(-2)
-  return `${day}.${month}.${year}`
-}
+import { formatDate, formatAmount } from './shared/utils/format'
 
 function App() {
   const [raffleData, setRaffleData] = useState<RaffleData | null>(null)
@@ -60,9 +54,30 @@ function App() {
   }
 
 
-  const { channels, endsDateTime, isParticipating, isFinished } = raffleData
-  const allSubscribed = channels.every((channel) => channel.isSubscribed)
+  const { channels, endsDateTime, participantsAmount, isParticipating, isFinished, isAllSubscribed } = raffleData
   const endDateObj = endsDateTime ? new Date(endsDateTime) : null
+
+  const handleParticipateClick = async () => {
+    try {
+      const response = await raffleApi.participate()
+
+      if (response.success) {
+        setRaffleData((prev) =>
+          prev
+            ? {
+                ...prev,
+                isParticipating: !prev.isParticipating,
+                participantsCount: response.participants_count,
+              }
+            : prev
+        )
+      } else {
+        console.error('Не удалось принять участие в розыгрыше:', response.message)
+      }
+    } catch (error) {
+      console.error('Ошибка при участии в розыгрыше:', error)
+    }
+  }
 
   if (isFinished) {
     return <div className="app">
@@ -90,19 +105,24 @@ function App() {
     <div className="app">
       <Header />
       <main className="app-main">
-        <HeroBlock allSubscribed={allSubscribed} />
+        <HeroBlock allSubscribed={isAllSubscribed} />
         <div className="content-block">
           <div className="raffle-end-row-container">
-            {endDateObj && (
               <div className="raffle-end-row">
                 <span className="raffle-end-row__label">Розыгрыш кончится:</span>
-                <span className="raffle-end-row__date">{formatDate(endDateObj)}</span>
+                {
+                  endDateObj ? (
+                    <span className="raffle-end-row__condition">{formatDate(endDateObj)}</span>
+                  ) : (
+                    <span className="raffle-end-row__condition"><img src="./src/assets/images/fire.png" alt="Количество участников" /> = {formatAmount(participantsAmount)}</span>
+                  )
+                }
               </div>
-            )}
             <button 
-              className={`participate-button ${isParticipating ? 'participate-button--participating' : ''} ${!allSubscribed ? 'participate-button--disabled' : ''}`}
+              className={`participate-button ${isParticipating ? 'participate-button--participating' : ''} ${!isAllSubscribed ? 'participate-button--disabled' : ''}`}
               type="button"
-              disabled={!allSubscribed}
+              disabled={!isAllSubscribed}
+              onClick={handleParticipateClick}
             >
               <img 
                 src={isParticipating ? "./src/assets/images/firework.png" : "./src/assets/images/fire.png"} 

@@ -1,3 +1,5 @@
+import { getAccessToken, getStartParam, refresh } from './authApi'
+
 // Типы для API (snake_case)
 type ApiMandatoryChannel = {
   channel_id: number
@@ -12,8 +14,15 @@ type ApiRaffleData = {
   participants_count: number
   participants_amount: number
   is_finished: boolean
-  is_participating: boolean
+  is_participant: boolean
   mandatory_channels: ApiMandatoryChannel[]
+  all_subscribed: boolean
+}
+
+type ApiParticipateResponse = {
+  success: boolean
+  message: string
+  participants_count: number
 }
 
 // Внутренние типы (camelCase)
@@ -29,7 +38,8 @@ export type RaffleData = {
   participantsAmount: number
   isFinished: boolean
   channels: Channel[]
-  isParticipating: boolean // Пока по дефолту false, позже будет с бекенда
+  isParticipating: boolean
+  isAllSubscribed: boolean
 }
 
 // Функция трансформации API данных во внутренний формат
@@ -44,40 +54,113 @@ function transformApiRaffleData(apiData: ApiRaffleData): RaffleData {
       title: channel.title,
       isSubscribed: channel.is_subscribed,
     })),
-    isParticipating: apiData.is_participating, // По дефолту false, позже будет с бекенда
+    isParticipating: apiData.is_participant,
+    isAllSubscribed: apiData.all_subscribed, // По дефолту false, позже будет с бекенда
   }
 }
 
-// Моковые данные в формате API (snake_case)
-const mockApiRaffleData: ApiRaffleData = {
-  prize_draw_id: 1,
-  title: 'Тестовый розыгрыш',
-  ends_datetime: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // через 7 дней
-  participants_count: 0,
-  participants_amount: 0,
-  is_finished: false,
-  is_participating: false,
-  mandatory_channels: [
-    { channel_id: 1, title: 'Канал 1', is_subscribed: true },
-    { channel_id: 2, title: 'Канал 2', is_subscribed: false },
-    { channel_id: 3, title: 'Канал 3', is_subscribed: true },
-    { channel_id: 4, title: 'Канал 4', is_subscribed: false },
-  ],
+const API_BASE_URL = 'https://testpostal.ru'
+
+/**
+ * Выполняет fetch запрос с автоматической обработкой 401 ошибок.
+ * При получении 401 автоматически обновляет токен через refresh и повторяет запрос.
+ */
+async function fetchWithAuth(url: string, options: RequestInit): Promise<Response> {
+  let response = await fetch(url, options)
+
+  // Если получили 401, пытаемся обновить токен
+  if (response.status === 401) {
+    await refresh()
+    
+    // Обновляем Authorization header с новым токеном
+    const newAccessToken = getAccessToken()
+    if (!newAccessToken) {
+      throw new Error('Не удалось получить новый access token')
+    }
+
+    const newOptions: RequestInit = {
+      ...options,
+      headers: {
+        ...options.headers,
+        'Authorization': `Bearer ${newAccessToken}`,
+      },
+    }
+
+    // Повторяем оригинальный запрос с новым токеном
+    response = await fetch(url, newOptions)
+  }
+
+  return response
 }
 
-// Моковый API сервис
 export const raffleApi = {
   // Получить данные розыгрыша
   async getRaffleData(): Promise<RaffleData> {
-    // Имитация задержки сети
-    await new Promise((resolve) => setTimeout(resolve, 500))
+    const accessToken = getAccessToken()
     
-    // Имитация получения данных с бекенда
-    // В реальном приложении здесь будет fetch запрос:
-    // const response = await fetch('/api/raffle')
-    // const apiData: ApiRaffleData = await response.json()
+    if (!accessToken) {
+      throw new Error('Access token не найден. Необходима аутентификация.')
+    }
+
+    const raffleUuid = getStartParam()
+    if (!raffleUuid) {
+      throw new Error('UUID розыгрыша не найден в start_param')
+    }
+
+    const response = await fetchWithAuth(
+      `${API_BASE_URL}/prize-draws/webapp/uuid/${raffleUuid}/check-subscriptions`,
+      {
+        method: 'GET',
+        headers: {
+          "Accept": "application/json",
+          'Authorization': `Bearer ${accessToken}`,
+        },
+      }
+    )
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      throw new Error(`Ошибка загрузки данных розыгрыша: ${response.status} ${errorText}`)
+    }
+
+    const apiData: ApiRaffleData = await response.json()
     
     // Трансформируем данные из snake_case в camelCase
-    return transformApiRaffleData(mockApiRaffleData)
+    return transformApiRaffleData(apiData)
+  },
+
+  // Отправить запрос на участие в розыгрыше
+  async participate(): Promise<ApiParticipateResponse> {
+    const accessToken = getAccessToken()
+
+    if (!accessToken) {
+      throw new Error('Access token не найден. Необходима аутентификация.')
+    }
+
+    const raffleUuid = getStartParam()
+    if (!raffleUuid) {
+      throw new Error('UUID розыгрыша не найден в start_param')
+    }
+
+    const response = await fetchWithAuth(
+      `${API_BASE_URL}/prize-draws/webapp/uuid/${raffleUuid}/participate`,
+      {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({}),
+      }
+    )
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      throw new Error(`Ошибка участия в розыгрыше: ${response.status} ${errorText}`)
+    }
+
+    const data: ApiParticipateResponse = await response.json()
+    return data
   },
 }
