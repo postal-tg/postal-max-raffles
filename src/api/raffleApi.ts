@@ -1,4 +1,4 @@
-import { getAccessToken, getStartParam, refresh } from './authApi'
+import { getAccessToken, refresh } from './authApi'
 
 // Типы для API (snake_case)
 type ApiMandatoryChannel = {
@@ -96,16 +96,11 @@ async function fetchWithAuth(url: string, options: RequestInit): Promise<Respons
 
 export const raffleApi = {
   // Получить данные розыгрыша
-  async getRaffleData(): Promise<RaffleData> {
+  async getRaffleData(raffleUuid: string): Promise<RaffleData> {
     const accessToken = getAccessToken()
     
     if (!accessToken) {
       throw new Error('Access token не найден. Необходима аутентификация.')
-    }
-
-    const raffleUuid = getStartParam()
-    if (!raffleUuid) {
-      throw new Error('UUID розыгрыша не найден в start_param')
     }
 
     const response = await fetchWithAuth(
@@ -131,16 +126,11 @@ export const raffleApi = {
   },
 
   // Отправить запрос на участие в розыгрыше
-  async participate(): Promise<ApiParticipateResponse> {
+  async participate(raffleUuid: string): Promise<ApiParticipateResponse> {
     const accessToken = getAccessToken()
 
     if (!accessToken) {
       throw new Error('Access token не найден. Необходима аутентификация.')
-    }
-
-    const raffleUuid = getStartParam()
-    if (!raffleUuid) {
-      throw new Error('UUID розыгрыша не найден в start_param')
     }
 
     const response = await fetchWithAuth(

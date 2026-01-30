@@ -3,13 +3,15 @@ import './App.css'
 import { Header } from './shared/ui/Header/Header'
 import { HeroBlock } from './shared/ui/HeroBlock/HeroBlock'
 import { raffleApi, type RaffleData } from './api/raffleApi'
-import { login } from './api/authApi'
+import { getStartParam, login } from './api/authApi'
 import { formatDate, formatAmount } from './shared/utils/format'
 
 function App() {
   const [raffleData, setRaffleData] = useState<RaffleData | null>(null)
   const [loading, setLoading] = useState(true)
   const [isParticipatingLoading, setIsParticipatingLoading] = useState(false)
+  const [raffleId, setRuffleId] = useState<string | null>(null)
+
   const initialized = useRef(false)
 
   useEffect(() => {
@@ -25,8 +27,12 @@ function App() {
         // Сначала выполняем аутентификацию
         await login()
         // Затем загружаем данные розыгрыша
-        const data = await raffleApi.getRaffleData()
-        setRaffleData(data)
+        if (raffleUuid) {
+          const data = await raffleApi.getRaffleData(raffleUuid)
+          setRaffleData(data)
+        } else {
+          throw new Error('UUID розыгрыша не найден в start_param')
+        }
       } catch (error) {
         console.error('Ошибка инициализации приложения:', error)
       } finally {
@@ -34,8 +40,49 @@ function App() {
       }
     }
 
-    initializeApp()
+    const raffleUuid = getStartParam()
+    if (raffleUuid) {
+      setRuffleId(raffleUuid)
+      initializeApp()
+    } else {
+      setLoading(false)
+    }
   }, [])
+
+  if (!raffleId) {
+    return <div className="app">
+      <Header />
+      <main className="app-main app-main--center">
+        <div className="raffle-end-row-container" style={{ gap: '8px' }}>
+          <div className="raffle-end-row-container__info">
+            <div>
+              <h1 className="not-found-title">Розыгрыш не найден</h1>
+              <p className="not-found-description">Вы открыли приложение без<br />ссылки на розыгрыш</p>
+            </div>
+          </div>
+          <div className="raffle-end-row-container__info raffle-end-row-container__info--gap-20">
+            <svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M47.3433 26C47.3433 14.2124 37.7876 4.65672 26 4.65672C14.2124 4.65672 4.65672 14.2124 4.65672 26C4.65672 37.7876 14.2124 47.3433 26 47.3433V52C11.6406 52 0 40.3594 0 26C0 11.6406 11.6406 0 26 0C40.3594 0 52 11.6406 52 26C52 40.3594 40.3594 52 26 52V47.3433C37.7876 47.3433 47.3433 37.7876 47.3433 26Z" fill="#5392DC" />
+              <path d="M28.5938 20.9219V37.8281H23.3125V20.9219H28.5938ZM23 16.5625C23 15.8125 23.2708 15.1979 23.8125 14.7188C24.3542 14.2396 25.0573 14 25.9219 14C26.7865 14 27.4896 14.2396 28.0312 14.7188C28.5729 15.1979 28.8438 15.8125 28.8438 16.5625C28.8438 17.3125 28.5729 17.9271 28.0312 18.4062C27.4896 18.8854 26.7865 19.125 25.9219 19.125C25.0573 19.125 24.3542 18.8854 23.8125 18.4062C23.2708 17.9271 23 17.3125 23 16.5625Z" fill="#5392DC" />
+            </svg>
+
+            <div>
+              <h2 className="not-found-subtitle">Участникам</h2>
+              <p className="not-found-description">Чтобы принять участие, перейдите по ссылке из канала, где опубликован розыгрыш</p>
+            </div>  <div> <h2 className="not-found-subtitle">Администраторам</h2>
+              <p className="not-found-description">Если вы администратор, создайте или управляйте розыгрышами через бота</p>
+            </div>
+          </div>
+
+        </div>
+        <button className="close-button close-button--not-found" onClick={() => {
+          if (window.WebApp?.close) {
+            window.WebApp.close()
+          }
+        }}>Закрыть</button>
+      </main>
+    </div>
+  }
 
   if (loading || !raffleData) {
     return (
@@ -60,22 +107,22 @@ function App() {
 
   const handleParticipateClick = async () => {
     // Предотвращаем повторные клики
-    if (isParticipatingLoading || isParticipating) {
+    if (isParticipatingLoading || isParticipating || !raffleId) {
       return
     }
 
     try {
       setIsParticipatingLoading(true)
-      const response = await raffleApi.participate()
+      const response = await raffleApi.participate(raffleId)
 
       if (response.success) {
         setRaffleData((prev) =>
           prev
             ? {
-                ...prev,
-                isParticipating: !prev.isParticipating,
-                participantsCount: response.participants_count,
-              }
+              ...prev,
+              isParticipating: !prev.isParticipating,
+              participantsCount: response.participants_count,
+            }
             : prev
         )
       } else {
@@ -90,24 +137,24 @@ function App() {
 
   if (isFinished) {
     return <div className="app">
-    <Header />
-    <main className="app-main app-main--center">
-      <div className="raffle-end-row-container">
-        <div className="raffle-end-row-container__info">
-          <svg width="67" height="67" viewBox="0 0 67 67" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M61 33.5C61 18.3122 48.6878 6 33.5 6C18.3122 6 6 18.3122 6 33.5C6 48.6878 18.3122 61 33.5 61V67C14.9985 67 0 52.0015 0 33.5C0 14.9985 14.9985 0 33.5 0C52.0015 0 67 14.9985 67 33.5C67 52.0015 52.0015 67 33.5 67V61C48.6878 61 61 48.6878 61 33.5Z" fill="#5392DC"/>
-            <path d="M30.4336 15.376C30.4336 13.7191 31.7767 12.376 33.4336 12.376C35.0904 12.376 36.4336 13.7191 36.4336 15.376V33.2393L49.0732 45.8789C50.2448 47.0505 50.2448 48.9495 49.0732 50.1211C47.9017 51.2927 46.0026 51.2927 44.8311 50.1211L31.3125 36.6025C30.7499 36.0399 30.4336 35.2771 30.4336 34.4814V15.376Z" fill="#5392DC"/>
-          </svg>
-          <span className="raffle-end-row__label">Розыгрыш уже завершен</span>
+      <Header />
+      <main className="app-main app-main--center">
+        <div className="raffle-end-row-container">
+          <div className="raffle-end-row-container__info">
+            <svg width="67" height="67" viewBox="0 0 67 67" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M61 33.5C61 18.3122 48.6878 6 33.5 6C18.3122 6 6 18.3122 6 33.5C6 48.6878 18.3122 61 33.5 61V67C14.9985 67 0 52.0015 0 33.5C0 14.9985 14.9985 0 33.5 0C52.0015 0 67 14.9985 67 33.5C67 52.0015 52.0015 67 33.5 67V61C48.6878 61 61 48.6878 61 33.5Z" fill="#5392DC" />
+              <path d="M30.4336 15.376C30.4336 13.7191 31.7767 12.376 33.4336 12.376C35.0904 12.376 36.4336 13.7191 36.4336 15.376V33.2393L49.0732 45.8789C50.2448 47.0505 50.2448 48.9495 49.0732 50.1211C47.9017 51.2927 46.0026 51.2927 44.8311 50.1211L31.3125 36.6025C30.7499 36.0399 30.4336 35.2771 30.4336 34.4814V15.376Z" fill="#5392DC" />
+            </svg>
+            <span className="raffle-end-row__label">Розыгрыш уже завершен</span>
+          </div>
+          <button className="close-button" onClick={() => {
+            if (window.WebApp?.close) {
+              window.WebApp.close()
+            }
+          }}>Закрыть</button>
         </div>
-        <button className="close-button" onClick={() => {
-          if (window.WebApp?.close) {
-            window.WebApp.close()
-          }
-        }}>Закрыть</button>
-      </div>
-    </main>
-  </div>
+      </main>
+    </div>
   }
 
   return (
@@ -117,25 +164,25 @@ function App() {
         <HeroBlock allSubscribed={isAllSubscribed} />
         <div className="content-block">
           <div className="raffle-end-row-container">
-              <div className="raffle-end-row">
-                <span className="raffle-end-row__label">Розыгрыш кончится:</span>
-                {
-                  endDateObj ? (
-                    <span className="raffle-end-row__condition">{formatDate(endDateObj)}</span>
-                  ) : (
-                    <span className="raffle-end-row__condition"><img src="./src/assets/images/fire.png" alt="Количество участников" /> = {formatAmount(participantsAmount)}</span>
-                  )
-                }
-              </div>
-            <button 
+            <div className="raffle-end-row">
+              <span className="raffle-end-row__label">Розыгрыш кончится:</span>
+              {
+                endDateObj ? (
+                  <span className="raffle-end-row__condition">{formatDate(endDateObj)}</span>
+                ) : (
+                  <span className="raffle-end-row__condition"><img src="./src/assets/images/fire.png" alt="Количество участников" /> = {formatAmount(participantsAmount)}</span>
+                )
+              }
+            </div>
+            <button
               className={`participate-button ${isParticipating ? 'participate-button--participating' : ''} ${!isAllSubscribed ? 'participate-button--disabled' : ''}`}
               type="button"
               disabled={!isAllSubscribed || isParticipating || isParticipatingLoading}
               onClick={handleParticipateClick}
             >
-              <img 
-                src={isParticipating ? "./src/assets/images/firework.png" : "./src/assets/images/fire.png"} 
-                alt={isParticipating ? "Вы уже участвуете" : "Участвовать"} 
+              <img
+                src={isParticipating ? "./src/assets/images/firework.png" : "./src/assets/images/fire.png"}
+                alt={isParticipating ? "Вы уже участвуете" : "Участвовать"}
               />
               <span className="participate-button__text">
                 {isParticipating ? "Вы уже участвуете" : "Участвовать"}
@@ -144,7 +191,7 @@ function App() {
           </div>
           <div>
             <div className="info-header">
-            <img src={"./src/assets/images/exclamation.png"} alt="Восклицательный знак" />
+              <img src={"./src/assets/images/exclamation.png"} alt="Восклицательный знак" />
               <span className="info-header__text">Дополнительная информация</span>
             </div>
             <p className="consent-text">
@@ -183,9 +230,9 @@ function App() {
               <div key={channel.id} className="channel-card">
                 <span className="channel-card__name">{channel.title}</span>
                 {channel.isSubscribed && (
-                  <img 
-                    src="./src/assets/images/check.png" 
-                    alt="Подписан" 
+                  <img
+                    src="./src/assets/images/check.png"
+                    alt="Подписан"
                     className="channel-card__icon"
                   />
                 )}
