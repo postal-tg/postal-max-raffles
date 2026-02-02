@@ -64,7 +64,7 @@ function App() {
     return <div className="app">
       <Header />
       <main className="app-main app-main--center">
-        <div className="raffle-end-row-container" style={{ gap: '8px' }}>
+        <div className="raffle-end-row-container" style={{ gap: '8px', marginTop: 'auto' }}>
           <div className="raffle-end-row-container__info">
             <div>
               <h1 className="not-found-title">Розыгрыш не найден</h1>
