@@ -31,7 +31,7 @@ export const Header = () => (
       </defs>
     </svg>
     <div className="header-text">
-      <span>Postal</span> — @postal_ruffles
+      <span>Postal</span> — @giveaway_bot
     </div>
   </div>
 );
