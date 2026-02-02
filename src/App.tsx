@@ -176,7 +176,7 @@ function App() {
         <div className="content-block">
           <div className="raffle-end-row-container">
             <div className="raffle-end-row">
-              <span className="raffle-end-row__label">Розыгрыш кончится:</span>
+              <span className="raffle-end-row__label">{endDateObj ? 'Розыгрыш кончится:' : 'Участников:'}</span>
               {
                 endDateObj ? (
                   <span className="raffle-end-row__condition">{formatDate(endDateObj)}</span>
