@@ -1,0 +1,216 @@
+{
+  "active": {
+    "participantsCount": 1250,
+    "participantsAmount": 5000,
+    "isFinished": false,
+    "channels": [
+      {
+        "id": 1,
+        "title": "Postal Max Official",
+        "isSubscribed": true,
+        "photo": "https://via.placeholder.com/100"
+      },
+      {
+        "id": 2,
+        "title": "Новости и акции",
+        "isSubscribed": true,
+        "photo": "https://via.placeholder.com/100"
+      },
+      {
+        "id": 3,
+        "title": "Эксклюзивные предложения",
+        "isSubscribed": true,
+        "photo": null
+      }
+    ],
+    "isParticipating": false,
+    "isAllSubscribed": true
+  },
+  "participating": {
+    "participantsCount": 3420,
+    "participantsAmount": 10000,
+    "isFinished": false,
+    "channels": [
+      {
+        "id": 1,
+        "title": "Postal Max Official",
+        "isSubscribed": true,
+        "photo": "https://via.placeholder.com/100"
+      },
+      {
+        "id": 2,
+        "title": "Новости и акции",
+        "isSubscribed": true,
+        "photo": "https://via.placeholder.com/100"
+      },
+      {
+        "id": 3,
+        "title": "Эксклюзивные предложения",
+        "isSubscribed": true,
+        "photo": null
+      }
+    ],
+    "isParticipating": true,
+    "isAllSubscribed": true
+  },
+  "notSubscribed": {
+    "participantsCount": 890,
+    "participantsAmount": 2000,
+    "isFinished": false,
+    "channels": [
+      {
+        "id": 1,
+        "title": "Postal Max Official",
+        "isSubscribed": true,
+        "photo": "https://via.placeholder.com/100"
+      },
+      {
+        "id": 2,
+        "title": "Новости и акции",
+        "isSubscribed": true,
+        "photo": "https://via.placeholder.com/100"
+      },
+      {
+        "id": 3,
+        "title": "Эксклюзивные предложения",
+        "isSubscribed": false,
+        "photo": null
+      }
+    ],
+    "isParticipating": false,
+    "isAllSubscribed": false
+  },
+  "withEndDate": {
+    "endsDateTime": "2026-02-10T12:00:00.000Z",
+    "participantsCount": 567,
+    "participantsAmount": 1000,
+    "isFinished": false,
+    "channels": [
+      {
+        "id": 1,
+        "title": "Postal Max Official",
+        "isSubscribed": true,
+        "photo": "https://via.placeholder.com/100"
+      },
+      {
+        "id": 2,
+        "title": "Новости и акции",
+        "isSubscribed": true,
+        "photo": "https://via.placeholder.com/100"
+      },
+      {
+        "id": 3,
+        "title": "Эксклюзивные предложения",
+        "isSubscribed": true,
+        "photo": null
+      }
+    ],
+    "isParticipating": false,
+    "isAllSubscribed": true
+  },
+  "withoutEndDate": {
+    "participantsCount": 234,
+    "participantsAmount": 500,
+    "isFinished": false,
+    "channels": [
+      {
+        "id": 1,
+        "title": "Postal Max Official",
+        "isSubscribed": true,
+        "photo": "https://via.placeholder.com/100"
+      }
+    ],
+    "isParticipating": false,
+    "isAllSubscribed": true
+  },
+  "finished": {
+    "endsDateTime": "2026-01-25T12:00:00.000Z",
+    "participantsCount": 5000,
+    "participantsAmount": 5000,
+    "isFinished": true,
+    "channels": [
+      {
+        "id": 1,
+        "title": "Postal Max Official",
+        "isSubscribed": true,
+        "photo": "https://via.placeholder.com/100"
+      },
+      {
+        "id": 2,
+        "title": "Новости и акции",
+        "isSubscribed": true,
+        "photo": "https://via.placeholder.com/100"
+      },
+      {
+        "id": 3,
+        "title": "Эксклюзивные предложения",
+        "isSubscribed": true,
+        "photo": null
+      }
+    ],
+    "isParticipating": true,
+    "isAllSubscribed": true
+  },
+  "manyChannels": {
+    "endsDateTime": "2026-02-15T12:00:00.000Z",
+    "participantsCount": 5678,
+    "participantsAmount": 10000,
+    "isFinished": false,
+    "channels": [
+      {
+        "id": 1,
+        "title": "Postal Max Official",
+        "isSubscribed": true,
+        "photo": "https://via.placeholder.com/100"
+      },
+      {
+        "id": 2,
+        "title": "Новости и акции",
+        "isSubscribed": true,
+        "photo": "https://via.placeholder.com/100"
+      },
+      {
+        "id": 3,
+        "title": "Эксклюзивные предложения",
+        "isSubscribed": true,
+        "photo": null
+      },
+      {
+        "id": 4,
+        "title": "Розыгрыши и конкурсы",
+        "isSubscribed": true,
+        "photo": "https://via.placeholder.com/100"
+      },
+      {
+        "id": 5,
+        "title": "Специальные предложения",
+        "isSubscribed": false,
+        "photo": null
+      },
+      {
+        "id": 6,
+        "title": "Партнерские каналы",
+        "isSubscribed": true,
+        "photo": "https://via.placeholder.com/100"
+      }
+    ],
+    "isParticipating": false,
+    "isAllSubscribed": false
+  },
+  "singleChannel": {
+    "endsDateTime": "2026-02-04T12:00:00.000Z",
+    "participantsCount": 45,
+    "participantsAmount": 100,
+    "isFinished": false,
+    "channels": [
+      {
+        "id": 1,
+        "title": "Postal Max Official",
+        "isSubscribed": true,
+        "photo": "https://via.placeholder.com/100"
+      }
+    ],
+    "isParticipating": false,
+    "isAllSubscribed": true
+  }
+}

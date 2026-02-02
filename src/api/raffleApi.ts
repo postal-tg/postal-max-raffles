@@ -5,6 +5,7 @@ type ApiMandatoryChannel = {
   channel_id: number
   title: string
   is_subscribed: boolean
+  photo: string | null
 }
 
 type ApiRaffleData = {
@@ -30,6 +31,7 @@ export type Channel = {
   id: number
   title: string
   isSubscribed: boolean
+  photo: string | null
 }
 
 export type RaffleData = {
@@ -53,6 +55,7 @@ function transformApiRaffleData(apiData: ApiRaffleData): RaffleData {
       id: channel.channel_id,
       title: channel.title,
       isSubscribed: channel.is_subscribed,
+      photo: channel.photo,
     })),
     isParticipating: apiData.is_participant,
     isAllSubscribed: apiData.all_subscribed, // По дефолту false, позже будет с бекенда

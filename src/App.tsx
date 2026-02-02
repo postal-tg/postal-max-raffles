@@ -5,6 +5,8 @@ import { HeroBlock } from './shared/ui/HeroBlock/HeroBlock'
 import { raffleApi, type RaffleData } from './api/raffleApi'
 import { getStartParam, login } from './api/authApi'
 import { formatDate, formatAmount } from './shared/utils/format'
+// Для использования мок-данных из JSON файла:
+// import mockData from './mocks/raffleMockData.json'
 
 function App() {
   const [raffleData, setRaffleData] = useState<RaffleData | null>(null)
@@ -24,15 +26,20 @@ function App() {
     const initializeApp = async () => {
       try {
         setLoading(true)
-        // Сначала выполняем аутентификацию
-        await login()
-        // Затем загружаем данные розыгрыша
-        if (raffleUuid) {
-          const data = await raffleApi.getRaffleData(raffleUuid)
-          setRaffleData(data)
-        } else {
-          throw new Error('UUID розыгрыша не найден в start_param')
+        // Сначала проверяем наличие UUID розыгрыша
+        const raffleUuid = getStartParam()
+        if (!raffleUuid) {
+          // Если UUID отсутствует, не делаем запросы к бекенду
+          setLoading(false)
+          return
         }
+
+        setRuffleId(raffleUuid)
+        // Выполняем аутентификацию
+        await login()
+        // Загружаем данные розыгрыша
+        const data = await raffleApi.getRaffleData(raffleUuid)
+        setRaffleData(data)
       } catch (error) {
         console.error('Ошибка инициализации приложения:', error)
       } finally {
@@ -40,13 +47,17 @@ function App() {
       }
     }
 
-    const raffleUuid = getStartParam()
-    if (raffleUuid) {
-      setRuffleId(raffleUuid)
-      initializeApp()
-    } else {
-      setLoading(false)
-    }
+    // ===== ИСПОЛЬЗОВАНИЕ МОК-ДАННЫХ ИЗ JSON =====
+    // Раскомментируйте следующие строки для использования мок-данных:
+    // import mockData from './mocks/raffleMockData.json'
+    // setLoading(true)
+    // const data = mockData.active as RaffleData // Можно изменить на mockData.participating, mockData.finished и т.д.
+    // setRaffleData(data)
+    // setLoading(false)
+    // return
+    // =============================================
+
+    initializeApp()
   }, [])
 
   if (!raffleId) {
@@ -102,7 +113,7 @@ function App() {
   }
 
 
-  const { channels, endsDateTime, participantsAmount, isParticipating, isFinished, isAllSubscribed } = raffleData
+  const { channels, endsDateTime, participantsAmount, participantsCount, isParticipating, isFinished, isAllSubscribed } = raffleData
   const endDateObj = endsDateTime ? new Date(endsDateTime) : null
 
   const handleParticipateClick = async () => {
@@ -170,7 +181,7 @@ function App() {
                 endDateObj ? (
                   <span className="raffle-end-row__condition">{formatDate(endDateObj)}</span>
                 ) : (
-                  <span className="raffle-end-row__condition"><img src="./src/assets/images/fire.png" alt="Количество участников" /> = {formatAmount(participantsAmount)}</span>
+                  <span className="raffle-end-row__condition">{participantsCount} из {formatAmount(participantsAmount)}</span>
                 )
               }
             </div>
@@ -228,6 +239,11 @@ function App() {
           <div className="channels-list">
             {channels.map((channel) => (
               <div key={channel.id} className="channel-card">
+                <img
+                  src={channel.photo || "./src/assets/images/not_found.png"}
+                  alt={channel.title}
+                  className="channel-card__logo"
+                />
                 <span className="channel-card__name">{channel.title}</span>
                 {channel.isSubscribed && (
                   <img
