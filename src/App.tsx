@@ -5,6 +5,11 @@ import { HeroBlock } from './shared/ui/HeroBlock/HeroBlock'
 import { raffleApi, type RaffleData } from './api/raffleApi'
 import { getStartParam, login } from './api/authApi'
 import { formatDate, formatAmount } from './shared/utils/format'
+import fireIcon from './assets/images/fire.png'
+import fireworkIcon from './assets/images/firework.png'
+import exclamationIcon from './assets/images/exclamation.png'
+import notFoundIcon from './assets/images/not_found.png'
+import checkIcon from './assets/images/check.png'
 // Для использования мок-данных из JSON файла:
 // import mockData from './mocks/raffleMockData.json'
 
@@ -192,7 +197,7 @@ function App() {
               onClick={handleParticipateClick}
             >
               <img
-                src={isParticipating ? "./src/assets/images/firework.png" : "./src/assets/images/fire.png"}
+                src={isParticipating ? fireworkIcon : fireIcon}
                 alt={isParticipating ? "Вы уже участвуете" : "Участвовать"}
               />
               <span className="participate-button__text">
@@ -202,7 +207,7 @@ function App() {
           </div>
           <div>
             <div className="info-header">
-              <img src={"./src/assets/images/exclamation.png"} alt="Восклицательный знак" />
+              <img src={exclamationIcon} alt="Восклицательный знак" />
               <span className="info-header__text">Дополнительная информация</span>
             </div>
             <p className="consent-text">
@@ -240,14 +245,14 @@ function App() {
             {channels.map((channel) => (
               <div key={channel.id} className="channel-card">
                 <img
-                  src={channel.photo || "./src/assets/images/not_found.png"}
+                  src={channel.photo || notFoundIcon}
                   alt={channel.title}
                   className="channel-card__logo"
                 />
                 <span className="channel-card__name">{channel.title}</span>
                 {channel.isSubscribed && (
                   <img
-                    src="./src/assets/images/check.png"
+                    src={checkIcon}
                     alt="Подписан"
                     className="channel-card__icon"
                   />
