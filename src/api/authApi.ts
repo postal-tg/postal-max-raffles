@@ -50,17 +50,36 @@ export function isAuthenticated(): boolean {
   return !!getAccessToken()
 }
 
+export type StartParamResult = {
+  raffleUuid: string
+  isPreview: boolean
+}
+
+function parseStartParam(raw: string | null): StartParamResult | null {
+  if (!raw?.trim()) return null
+
+  const PREVIEW_PREFIX = 'p_'
+  const isPreview = raw.startsWith(PREVIEW_PREFIX)
+  const raffleUuid = isPreview ? raw.slice(PREVIEW_PREFIX.length) : raw
+
+  if (!raffleUuid) return null
+
+  return { raffleUuid, isPreview }
+}
+
 /**
- * Извлекает start_param из initData
+ * Извлекает и парсит start_param из initData.
+ * p_<uuid> — preview режим, <uuid> — обычный режим
  */
-export function getStartParam(): string | null {
+export function getParsedStartParam(): StartParamResult | null {
   const initData = window.WebApp?.initData
   if (!initData) {
     return null
   }
 
   const params = new URLSearchParams(initData)
-  return params.get('start_param')
+  const raw = params.get('start_param')
+  return parseStartParam(raw)
 }
 
 /**

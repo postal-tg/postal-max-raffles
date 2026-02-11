@@ -3,7 +3,7 @@ import './App.css'
 import { Header } from './shared/ui/Header/Header'
 import { HeroBlock } from './shared/ui/HeroBlock/HeroBlock'
 import { raffleApi, type RaffleData } from './api/raffleApi'
-import { getStartParam, login } from './api/authApi'
+import { getParsedStartParam, login } from './api/authApi'
 import { formatDate, formatAmount } from './shared/utils/format'
 import fireIcon from './assets/images/fire.png'
 import fireworkIcon from './assets/images/firework.png'
@@ -31,19 +31,22 @@ function App() {
     const initializeApp = async () => {
       try {
         setLoading(true)
-        // Сначала проверяем наличие UUID розыгрыша
-        const raffleUuid = getStartParam()
-        if (!raffleUuid) {
+        // Сначала проверяем наличие UUID розыгрыша и режим (preview / обычный)
+        const parsed = getParsedStartParam()
+        if (!parsed) {
           // Если UUID отсутствует, не делаем запросы к бекенду
           setLoading(false)
           return
         }
 
+        const { raffleUuid, isPreview } = parsed
         setRuffleId(raffleUuid)
         // Выполняем аутентификацию
         await login()
-        // Загружаем данные розыгрыша
-        const data = await raffleApi.getRaffleData(raffleUuid)
+        // Загружаем данные розыгрыша (preview или обычный эндпоинт)
+        const data = isPreview
+          ? await raffleApi.getRafflePreviewData(raffleUuid)
+          : await raffleApi.getRaffleData(raffleUuid)
         setRaffleData(data)
       } catch (error) {
         console.error('Ошибка инициализации приложения:', error)
@@ -215,52 +218,53 @@ function App() {
             </p>
           </div>
         </div>
-        <div className="content-block">
-          <div className="channels-header">
-            <svg
-              width="22"
-              height="22"
-              viewBox="0 0 22 22"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="channels-header__icon"
-            >
-              <rect width="22" height="22" rx="11" fill="#2869B6" />
-              <path
-                d="M9.33568 14.7643L6.88875 9.51362L12.0496 4.89314C12.712 4.30011 13.7589 4.51454 14.1349 5.32024L17.2388 11.9732C17.6171 12.7841 17.0998 13.7291 16.2128 13.8474L9.33568 14.7643Z"
-                fill="white"
-              />
-              <path
-                d="M8.26515 15.0872L5.97114 10.1593L5.19612 10.4867C4.54182 10.7631 4.24613 11.5262 4.54336 12.1713L5.77321 14.8405C6.0617 15.4666 6.80055 15.7437 7.42964 15.4617L8.26515 15.0872Z"
-                fill="white"
-              />
-              <path
-                d="M8.87688 15.597L8.58801 15.7499L9.26178 17.2146C9.5392 17.8177 10.2469 18.0896 10.8568 17.8272L11.6163 17.5005C12.2607 17.2233 12.5405 16.4622 12.2292 15.8336L11.9016 15.1722L8.87688 15.597Z"
-                fill="white"
-              />
-            </svg>
-            <span className="channels-header__text">Каналы для подписки</span>
-          </div>
-          <div className="channels-list">
-            {channels.map((channel) => (
-              <div key={channel.id} className="channel-card">
-                <img
-                  src={channel.photo || notFoundIcon}
-                  alt={channel.title}
-                  className="channel-card__logo"
+        {channels.length > 0 && (
+          <div className="content-block">
+            <div className="channels-header">
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 22 22"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="channels-header__icon"
+              >
+                <rect width="22" height="22" rx="11" fill="#2869B6" />
+                <path
+                  d="M9.33568 14.7643L6.88875 9.51362L12.0496 4.89314C12.712 4.30011 13.7589 4.51454 14.1349 5.32024L17.2388 11.9732C17.6171 12.7841 17.0998 13.7291 16.2128 13.8474L9.33568 14.7643Z"
+                  fill="white"
                 />
-                <span className="channel-card__name">{channel.title}</span>
-                {channel.isSubscribed && (
+                <path
+                  d="M8.26515 15.0872L5.97114 10.1593L5.19612 10.4867C4.54182 10.7631 4.24613 11.5262 4.54336 12.1713L5.77321 14.8405C6.0617 15.4666 6.80055 15.7437 7.42964 15.4617L8.26515 15.0872Z"
+                  fill="white"
+                />
+                <path
+                  d="M8.87688 15.597L8.58801 15.7499L9.26178 17.2146C9.5392 17.8177 10.2469 18.0896 10.8568 17.8272L11.6163 17.5005C12.2607 17.2233 12.5405 16.4622 12.2292 15.8336L11.9016 15.1722L8.87688 15.597Z"
+                  fill="white"
+                />
+              </svg>
+              <span className="channels-header__text">Каналы для подписки</span>
+            </div>
+            <div className="channels-list">
+              {channels.map((channel) => (
+                <div key={channel.id} className="channel-card">
                   <img
-                    src={checkIcon}
-                    alt="Подписан"
-                    className="channel-card__icon"
+                    src={channel.photo || notFoundIcon}
+                    alt={channel.title}
+                    className="channel-card__logo"
                   />
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
+                  <span className="channel-card__name">{channel.title}</span>
+                  {channel.isSubscribed && (
+                    <img
+                      src={checkIcon}
+                      alt="Подписан"
+                      className="channel-card__icon"
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>)}
       </main>
     </div>
   )

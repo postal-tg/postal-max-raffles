@@ -128,6 +128,34 @@ export const raffleApi = {
     return transformApiRaffleData(apiData)
   },
 
+  // Получить данные розыгрыша в режиме preview
+  async getRafflePreviewData(raffleUuid: string): Promise<RaffleData> {
+    const accessToken = getAccessToken()
+
+    if (!accessToken) {
+      throw new Error('Access token не найден. Необходима аутентификация.')
+    }
+
+    const response = await fetchWithAuth(
+      `${API_BASE_URL}/prize-draws/webapp/uuid/${raffleUuid}/preview`,
+      {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+        },
+      }
+    )
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      throw new Error(`Ошибка загрузки preview розыгрыша: ${response.status} ${errorText}`)
+    }
+
+    const apiData: ApiRaffleData = await response.json()
+    return transformApiRaffleData(apiData)
+  },
+
   // Отправить запрос на участие в розыгрыше
   async participate(raffleUuid: string): Promise<ApiParticipateResponse> {
     const accessToken = getAccessToken()
