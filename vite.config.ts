@@ -9,6 +9,7 @@ export default defineConfig(({ mode }) => {
     base: env.VITE_BASE_URL || '/',
     plugins: [react()],
     server: {
+      hmr: false,
       allowedHosts: env.NGROK_HOST
         ? [env.NGROK_HOST]
         : undefined,
