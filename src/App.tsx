@@ -7,11 +7,11 @@ import { getParsedStartParam, login } from './api/authApi'
 import { formatDate, formatAmount } from './shared/utils/format'
 import fireIcon from './assets/images/fire.png'
 import fireworkIcon from './assets/images/firework.png'
-import exclamationIcon from './assets/images/exclamation.png'
 import notFoundIcon from './assets/images/not_found.png'
 import checkIcon from './assets/images/check.png'
-// Для использования мок-данных из JSON файла:
-// import mockData from './mocks/raffleMockData.json'
+import mockData from './mocks/raffleMockData.json'
+
+const useMock = import.meta.env.VITE_USE_MOCK === 'true'
 
 function App() {
   const [raffleData, setRaffleData] = useState<RaffleData | null>(null)
@@ -31,19 +31,23 @@ function App() {
     const initializeApp = async () => {
       try {
         setLoading(true)
-        // Сначала проверяем наличие UUID розыгрыша и режим (preview / обычный)
+
+        if (useMock) {
+          setRuffleId('mock')
+          setRaffleData(mockData as RaffleData)
+          setLoading(false)
+          return
+        }
+
         const parsed = getParsedStartParam()
         if (!parsed) {
-          // Если UUID отсутствует, не делаем запросы к бекенду
           setLoading(false)
           return
         }
 
         const { raffleUuid, isPreview } = parsed
         setRuffleId(raffleUuid)
-        // Выполняем аутентификацию
         await login()
-        // Загружаем данные розыгрыша (preview или обычный эндпоинт)
         const data = isPreview
           ? await raffleApi.getRafflePreviewData(raffleUuid)
           : await raffleApi.getRaffleData(raffleUuid)
@@ -54,16 +58,6 @@ function App() {
         setLoading(false)
       }
     }
-
-    // ===== ИСПОЛЬЗОВАНИЕ МОК-ДАННЫХ ИЗ JSON =====
-    // Раскомментируйте следующие строки для использования мок-данных:
-    // import mockData from './mocks/raffleMockData.json'
-    // setLoading(true)
-    // const data = mockData.active as RaffleData // Можно изменить на mockData.participating, mockData.finished и т.д.
-    // setRaffleData(data)
-    // setLoading(false)
-    // return
-    // =============================================
 
     initializeApp()
   }, [])
@@ -125,8 +119,20 @@ function App() {
   const endDateObj = endsDateTime ? new Date(endsDateTime) : null
 
   const handleParticipateClick = async () => {
-    // Предотвращаем повторные клики
     if (isParticipatingLoading || isParticipating || !raffleId) {
+      return
+    }
+
+    if (useMock) {
+      setRaffleData((prev) =>
+        prev
+          ? {
+            ...prev,
+            isParticipating: true,
+            participantsCount: prev.participantsCount + 1,
+          }
+          : prev
+      )
       return
     }
 
@@ -209,13 +215,9 @@ function App() {
             </button>
           </div>
           <div>
-            <div className="info-header">
-              <img src={exclamationIcon} alt="Восклицательный знак" />
-              <span className="info-header__text">Дополнительная информация</span>
-            </div>
+
             <p className="consent-text">
-              Нажимая кнопку «Участвовать» вы подтверждаете свое согласие с политикой обработки персональных данных и пользовательским соглашением
-            </p>
+              Нажимая кнопку "Участвовать" вы соглашаетесь с <a href="https://postal.guru/agreement" target="_blank" rel="noopener noreferrer">пользовательским соглашением</a></p>
           </div>
         </div>
         {channels.length > 0 && (

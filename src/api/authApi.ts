@@ -93,8 +93,15 @@ export function clearTokens(): void {
 /**
  * Выполняет аутентификацию через WebApp initData.
  * Получает initData, отправляет POST на /prize-draws/webapp/login и сохраняет токены.
+ * В режиме VITE_USE_MOCK запрос не выполняется, сохраняются фейковые токены.
  */
 export async function login(): Promise<AuthResponse> {
+  if (import.meta.env.VITE_USE_MOCK === 'true') {
+    const mockAuth: AuthResponse = { access_token: 'mock', refresh_token: 'mock' }
+    saveTokens(mockAuth.access_token, mockAuth.refresh_token)
+    return mockAuth
+  }
+
   const initData = window.WebApp?.initData
 
   const response = await fetch(`${API_BASE_URL}/prize-draws/webapp/login`, {
