@@ -1,7 +1,14 @@
 import "./Header.css";
 
+const GIVEAWAY_BOT_URL = "https://max.ru/giveaway_bot";
+
 export const Header = () => (
-  <div className="header-container">
+  <a
+    className="header-container"
+    href={GIVEAWAY_BOT_URL}
+    target="_blank"
+    rel="noopener noreferrer"
+  >
     <svg width="11" height="14" viewBox="0 0 11 14" fill="none" xmlns="http://www.w3.org/2000/svg">
       <g clipPath="url(#clip0_874_2002)">
         <path
@@ -33,5 +40,5 @@ export const Header = () => (
     <div className="header-text">
       <span>Postal</span> — @giveaway_bot
     </div>
-  </div>
+  </a>
 );
