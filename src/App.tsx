@@ -190,7 +190,7 @@ function App() {
         <div className="content-block">
           <div className="raffle-end-row-container">
             <div className="raffle-end-row">
-              <span className="raffle-end-row__label">{endDateObj ? 'Розыгрыш кончится:' : 'Участников:'}</span>
+              <span className="raffle-end-row__label">{endDateObj ? 'Розыгрыш завершится:' : 'Участников:'}</span>
               {
                 endDateObj ? (
                   <span className="raffle-end-row__condition">{formatDate(endDateObj)}</span>
@@ -217,7 +217,7 @@ function App() {
           <div>
 
             <p className="consent-text">
-              Нажимая кнопку "Участвовать" вы соглашаетесь с <a href="https://postal.guru/agreement" target="_blank" rel="noopener noreferrer">пользовательским соглашением</a></p>
+              Нажимая кнопку "Участвовать" вы соглашаетесь с <a href="https://postal.guru/agreement" target="_blank" rel="noopener noreferrer">Пользовательским соглашением</a></p>
           </div>
         </div>
         {channels.length > 0 && (
