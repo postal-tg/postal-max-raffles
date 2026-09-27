@@ -1,22 +1,16 @@
-FROM node:22-alpine AS build
+FROM node:22-alpine
 
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm ci --include=dev
 
-COPY . .
-RUN npm run build
+COPY --chown=node:node . .
+RUN chown node:node /app && chown -R node:node /app/node_modules
 
-
-FROM node:22-alpine AS runtime
-
-WORKDIR /app
 ENV NODE_ENV=production
-
-COPY --from=build --chown=node:node /app/package.json /app/package-lock.json ./
-COPY --from=build --chown=node:node /app/node_modules ./node_modules
-COPY --from=build --chown=node:node /app/dist ./dist
-COPY --from=build --chown=node:node /app/vite.config.ts ./vite.config.ts
-
 USER node
+
+# Compile only after the deployment configuration has been mounted.
+ENTRYPOINT ["sh", "/app/docker-entrypoint.sh"]
+CMD ["npm", "run", "preview", "--", "--host", "0.0.0.0", "--port", "4000", "--strictPort"]
