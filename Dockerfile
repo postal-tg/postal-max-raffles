@@ -13,4 +13,4 @@ USER node
 
 # Compile only after the deployment configuration has been mounted.
 ENTRYPOINT ["sh", "/app/docker-entrypoint.sh"]
-CMD ["npm", "run", "preview", "--", "--host", "0.0.0.0", "--port", "4000", "--strictPort"]
+CMD ["npm", "run", "preview", "--", "--host", "0.0.0.0", "--port", "5173", "--strictPort"]
